@@ -8,14 +8,14 @@ describe('assets', () => {
     const stack = new Stack();
 
     // WHEN
-    stack.addFileAsset({
+    stack.synthesizer.addFileAsset({
       fileName: 'file-name',
       packaging: FileAssetPackaging.ZIP_DIRECTORY,
       sourceHash: 'source-hash',
     });
 
     // THEN
-    const assetMetadata = stack.node.metadata.find(({ type }) => type === cxschema.ArtifactMetadataEntryType.ASSET);
+    const assetMetadata = stack.node.metadataEntry.find(({ type }) => type === cxschema.ArtifactMetadataEntryType.ASSET);
 
     expect(assetMetadata && assetMetadata.data).toBeDefined();
 
@@ -52,7 +52,7 @@ describe('assets', () => {
     const stack = new Stack();
 
     // WHEN
-    const assetLocation = stack.addFileAsset({
+    const assetLocation = stack.synthesizer.addFileAsset({
       fileName: 'file-name',
       packaging: FileAssetPackaging.ZIP_DIRECTORY,
       sourceHash: 'source-hash',
@@ -75,14 +75,14 @@ describe('assets', () => {
     const stack = new Stack();
 
     // WHEN
-    stack.addDockerImageAsset({
+    stack.synthesizer.addDockerImageAsset({
       sourceHash: 'source-hash',
       directoryName: 'directory-name',
       repositoryName: 'repository-name',
     });
 
     // THEN
-    const assetMetadata = stack.node.metadata.find(({ type }) => type === cxschema.ArtifactMetadataEntryType.ASSET);
+    const assetMetadata = stack.node.metadataEntry.find(({ type }) => type === cxschema.ArtifactMetadataEntryType.ASSET);
 
     expect(assetMetadata && assetMetadata.data).toBeDefined();
 
@@ -104,13 +104,13 @@ describe('assets', () => {
     const stack = new Stack();
 
     // WHEN
-    stack.addDockerImageAsset({
+    stack.synthesizer.addDockerImageAsset({
       sourceHash: 'source-hash',
       directoryName: 'directory-name',
     });
 
     // THEN
-    const assetMetadata = stack.node.metadata.find(({ type }) => type === cxschema.ArtifactMetadataEntryType.ASSET);
+    const assetMetadata = stack.node.metadataEntry.find(({ type }) => type === cxschema.ArtifactMetadataEntryType.ASSET);
 
     expect(assetMetadata && assetMetadata.data).toBeDefined();
 
@@ -133,13 +133,13 @@ describe('assets', () => {
     stack.node.setContext('assets-ecr-repository-name', 'my-custom-repo-name');
 
     // WHEN
-    stack.addDockerImageAsset({
+    stack.synthesizer.addDockerImageAsset({
       sourceHash: 'source-hash',
       directoryName: 'directory-name',
     });
 
     // THEN
-    const assetMetadata = stack.node.metadata.find(({ type }) => type === cxschema.ArtifactMetadataEntryType.ASSET);
+    const assetMetadata = stack.node.metadataEntry.find(({ type }) => type === cxschema.ArtifactMetadataEntryType.ASSET);
 
     expect(assetMetadata && assetMetadata.data).toBeDefined();
 

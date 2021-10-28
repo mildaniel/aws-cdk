@@ -1,3 +1,4 @@
+import { describeDeprecated, testDeprecated } from '@aws-cdk/cdk-build-tools';
 import { Arn, ArnComponents, ArnFormat, Aws, CfnOutput, ScopedAws, Stack, Token } from '../lib';
 import { Intrinsic } from '../lib/private/intrinsic';
 import { evaluateCFN } from './evaluate-cfn';
@@ -98,7 +99,7 @@ describe('arn', () => {
 
   });
 
-  describe('Arn.parse(s)', () => {
+  describeDeprecated('Arn.parse(s)', () => {
 
     describe('fails', () => {
       test('if doesn\'t start with "arn:"', () => {
@@ -335,7 +336,7 @@ describe('arn', () => {
 
   });
 
-  test('parse other fields if only some are tokens', () => {
+  testDeprecated('parse other fields if only some are tokens', () => {
     // GIVEN
     const stack = new Stack();
 
