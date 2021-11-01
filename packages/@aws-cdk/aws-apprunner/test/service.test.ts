@@ -3,6 +3,7 @@ import { Template } from '@aws-cdk/assertions';
 import * as ecr from '@aws-cdk/aws-ecr';
 import * as ecr_assets from '@aws-cdk/aws-ecr-assets';
 import * as iam from '@aws-cdk/aws-iam';
+import { testDeprecated } from '@aws-cdk/cdk-build-tools';
 import * as cdk from '@aws-cdk/core';
 import { Service, GitHubConnection, Runtime, Source, Cpu, Memory, ConfigurationSourceType } from '../lib';
 
@@ -100,7 +101,8 @@ test('create a service from existing ECR repository(image repository type: ECR)'
   });
 });
 
-test('create a service with local assets(image repository type: ECR)', () => {
+// Marking this as deprecated until this bug is fixed - https://github.com/aws/jsii/issues/3102
+testDeprecated('create a service with local assets(image repository type: ECR)', () => {
   // GIVEN
   const app = new cdk.App();
   const stack = new cdk.Stack(app, 'demo-stack');
@@ -304,7 +306,8 @@ test('undefined imageConfiguration port is allowed', () => {
   });
 });
 
-test('custom IAM access role and instance role are allowed', () => {
+// Marking this as deprecated until this bug is fixed - https://github.com/aws/jsii/issues/3102
+testDeprecated('custom IAM access role and instance role are allowed', () => {
   // GIVEN
   const app = new cdk.App();
   const stack = new cdk.Stack(app, 'demo-stack');

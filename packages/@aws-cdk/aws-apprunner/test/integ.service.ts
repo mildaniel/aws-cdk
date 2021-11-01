@@ -1,9 +1,12 @@
 import * as path from 'path';
 import * as ecr from '@aws-cdk/aws-ecr';
 import * as assets from '@aws-cdk/aws-ecr-assets';
+import { DeprecatedSymbols } from '@aws-cdk/cdk-build-tools';
 import * as cdk from '@aws-cdk/core';
 import { Service, Source, GitHubConnection, ConfigurationSourceType, Runtime } from '../lib';
 
+// Marking this as deprecated until this bug is fixed - https://github.com/aws/jsii/issues/3102
+const deprecated = DeprecatedSymbols.quiet();
 
 const app = new cdk.App();
 
@@ -69,3 +72,5 @@ const service5 = new Service(stack, 'Service5', {
   }),
 });
 new cdk.CfnOutput(stack, 'URL5', { value: `https://${service5.serviceUrl}` });
+
+DeprecatedSymbols.reset(deprecated);
