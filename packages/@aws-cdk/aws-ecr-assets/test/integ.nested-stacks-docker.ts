@@ -1,5 +1,6 @@
 import * as path from 'path';
 import * as iam from '@aws-cdk/aws-iam';
+import { DeprecatedSymbols } from '@aws-cdk/cdk-build-tools';
 import { App, CfnOutput, NestedStack, NestedStackProps, Stack, StackProps } from '@aws-cdk/core';
 import * as cxapi from '@aws-cdk/cx-api';
 import { Construct } from 'constructs';
@@ -28,6 +29,9 @@ class TheParentStack extends Stack {
   }
 }
 
+// Marking test as deprecated until https://github.com/aws/jsii/issues/3102 is fixed.
+const deprecated = DeprecatedSymbols.quiet();
+
 const app = new App({
   context: {
     [cxapi.DOCKER_IGNORE_SUPPORT]: true,
@@ -35,3 +39,5 @@ const app = new App({
 });
 new TheParentStack(app, 'nested-stacks-docker');
 app.synth();
+
+DeprecatedSymbols.reset(deprecated);

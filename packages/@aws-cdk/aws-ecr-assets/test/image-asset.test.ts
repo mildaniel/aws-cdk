@@ -2,10 +2,10 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { expect as ourExpect, haveResource } from '@aws-cdk/assert-internal';
 import * as iam from '@aws-cdk/aws-iam';
+import { describeDeprecated, testFutureBehavior } from '@aws-cdk/cdk-build-tools';
 import * as cxschema from '@aws-cdk/cloud-assembly-schema';
 import { App, DefaultStackSynthesizer, IgnoreMode, Lazy, LegacyStackSynthesizer, Stack, Stage } from '@aws-cdk/core';
 import * as cxapi from '@aws-cdk/cx-api';
-import { testFutureBehavior } from '@aws-cdk/cdk-build-tools/lib/feature-flag';
 import { DockerImageAsset } from '../lib';
 
 /* eslint-disable quote-props */
@@ -14,7 +14,8 @@ const DEMO_IMAGE_ASSET_HASH = '8c1d9ca9f5d37b1c4870c13a9f855301bb42c1848dbcdd5ed
 
 const flags = { [cxapi.DOCKER_IGNORE_SUPPORT]: true };
 
-describe('image asset', () => {
+// Marking the entire test suite as deprecated until https://github.com/aws/jsii/issues/3102 is fixed.
+describeDeprecated('image asset', () => {
   testFutureBehavior('test instantiating Asset Image', flags, App, (app) => {
     // WHEN
     const stack = new Stack(app);
@@ -393,53 +394,56 @@ function testDockerDirectoryIsStagedWithoutFilesSpecifiedInExcludeOption(app: Ap
 
 }
 
-testFutureBehavior('nested assemblies share assets: legacy synth edition', flags, App, (app) => {
-  // GIVEN
-  const stack1 = new Stack(new Stage(app, 'Stage1'), 'Stack', { synthesizer: new LegacyStackSynthesizer() });
-  const stack2 = new Stack(new Stage(app, 'Stage2'), 'Stack', { synthesizer: new LegacyStackSynthesizer() });
+// Marking the entire test suite as deprecated until https://github.com/aws/jsii/issues/3102 is fixed.
+describeDeprecated('nested assemblies share assets', () => {
+  testFutureBehavior('legacy synth edition', flags, App, (app) => {
+    // GIVEN
+    const stack1 = new Stack(new Stage(app, 'Stage1'), 'Stack', { synthesizer: new LegacyStackSynthesizer() });
+    const stack2 = new Stack(new Stage(app, 'Stage2'), 'Stack', { synthesizer: new LegacyStackSynthesizer() });
 
-  // WHEN
-  new DockerImageAsset(stack1, 'Image', { directory: path.join(__dirname, 'demo-image') });
-  new DockerImageAsset(stack2, 'Image', { directory: path.join(__dirname, 'demo-image') });
+    // WHEN
+    new DockerImageAsset(stack1, 'Image', { directory: path.join(__dirname, 'demo-image') });
+    new DockerImageAsset(stack2, 'Image', { directory: path.join(__dirname, 'demo-image') });
 
-  // THEN
-  const assembly = app.synth();
+    // THEN
+    const assembly = app.synth();
 
-  // Read the assets from the stack metadata
-  for (const stageName of ['Stage1', 'Stage2']) {
-    const stackArtifact = assembly.getNestedAssembly(`assembly-${stageName}`).artifacts.filter(isStackArtifact)[0];
-    const assetMeta = stackArtifact.findMetadataByType(cxschema.ArtifactMetadataEntryType.ASSET);
-    expect(assetMeta[0]).toEqual(
-      expect.objectContaining({
-        data: expect.objectContaining({
-          path: `../asset.${DEMO_IMAGE_ASSET_HASH}`,
+    // Read the assets from the stack metadata
+    for (const stageName of ['Stage1', 'Stage2']) {
+      const stackArtifact = assembly.getNestedAssembly(`assembly-${stageName}`).artifacts.filter(isStackArtifact)[0];
+      const assetMeta = stackArtifact.findMetadataByType(cxschema.ArtifactMetadataEntryType.ASSET);
+      expect(assetMeta[0]).toEqual(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            path: `../asset.${DEMO_IMAGE_ASSET_HASH}`,
+          }),
         }),
-      }),
-    );
-  }
-});
+      );
+    }
+  });
 
-testFutureBehavior('nested assemblies share assets: default synth edition', flags, App, (app) => {
-  // GIVEN
-  const stack1 = new Stack(new Stage(app, 'Stage1'), 'Stack', { synthesizer: new DefaultStackSynthesizer() });
-  const stack2 = new Stack(new Stage(app, 'Stage2'), 'Stack', { synthesizer: new DefaultStackSynthesizer() });
+  testFutureBehavior('default synth edition', flags, App, (app) => {
+    // GIVEN
+    const stack1 = new Stack(new Stage(app, 'Stage1'), 'Stack', { synthesizer: new DefaultStackSynthesizer() });
+    const stack2 = new Stack(new Stage(app, 'Stage2'), 'Stack', { synthesizer: new DefaultStackSynthesizer() });
 
-  // WHEN
-  new DockerImageAsset(stack1, 'Image', { directory: path.join(__dirname, 'demo-image') });
-  new DockerImageAsset(stack2, 'Image', { directory: path.join(__dirname, 'demo-image') });
+    // WHEN
+    new DockerImageAsset(stack1, 'Image', { directory: path.join(__dirname, 'demo-image') });
+    new DockerImageAsset(stack2, 'Image', { directory: path.join(__dirname, 'demo-image') });
 
-  // THEN
-  const assembly = app.synth();
+    // THEN
+    const assembly = app.synth();
 
-  // Read the asset manifests to verify the file paths
-  for (const stageName of ['Stage1', 'Stage2']) {
-    const manifestArtifact = assembly.getNestedAssembly(`assembly-${stageName}`).artifacts.filter(isAssetManifestArtifact)[0];
-    const manifest = JSON.parse(fs.readFileSync(manifestArtifact.file, { encoding: 'utf-8' }));
+    // Read the asset manifests to verify the file paths
+    for (const stageName of ['Stage1', 'Stage2']) {
+      const manifestArtifact = assembly.getNestedAssembly(`assembly-${stageName}`).artifacts.filter(isAssetManifestArtifact)[0];
+      const manifest = JSON.parse(fs.readFileSync(manifestArtifact.file, { encoding: 'utf-8' }));
 
-    expect(manifest.dockerImages[DEMO_IMAGE_ASSET_HASH].source).toEqual({
-      directory: `../asset.${DEMO_IMAGE_ASSET_HASH}`,
-    });
-  }
+      expect(manifest.dockerImages[DEMO_IMAGE_ASSET_HASH].source).toEqual({
+        directory: `../asset.${DEMO_IMAGE_ASSET_HASH}`,
+      });
+    }
+  });
 });
 
 function isStackArtifact(x: any): x is cxapi.CloudFormationStackArtifact {
