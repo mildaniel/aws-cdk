@@ -1,5 +1,6 @@
 import * as path from 'path';
 import * as iam from '@aws-cdk/aws-iam';
+import { DeprecatedSymbols } from '@aws-cdk/cdk-build-tools';
 import * as cdk from '@aws-cdk/core';
 import * as assets from '../lib';
 
@@ -23,6 +24,11 @@ class TestStack extends cdk.Stack {
   }
 }
 
+// Marking test as deprecated until https://github.com/aws/jsii/issues/3102 is fixed.
+const deprecated = DeprecatedSymbols.quiet();
+
 const app = new cdk.App();
 new TestStack(app, 'aws-cdk-asset-refs');
 app.synth();
+
+DeprecatedSymbols.reset(deprecated);
