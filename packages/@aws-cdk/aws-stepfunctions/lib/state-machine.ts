@@ -142,7 +142,9 @@ abstract class StateMachineBase extends Resource implements IStateMachine {
       public readonly stateMachineArn = stateMachineArn;
       public readonly grantPrincipal = new iam.UnknownPrincipal({ resource: this });
     }
-    return new Import(scope, id);
+    return new Import(scope, id, {
+      environmentFromArn: stateMachineArn,
+    });
   }
 
   public abstract readonly stateMachineArn: string;
@@ -160,6 +162,18 @@ abstract class StateMachineBase extends Resource implements IStateMachine {
     return iam.Grant.addToPrincipal({
       grantee: identity,
       actions: ['states:StartExecution'],
+      resourceArns: [this.stateMachineArn],
+    });
+  }
+
+  /**
+   * Grant the given identity permissions to start a synchronous execution of
+   * this state machine.
+   */
+  public grantStartSyncExecution(identity: iam.IGrantable): iam.Grant {
+    return iam.Grant.addToPrincipal({
+      grantee: identity,
+      actions: ['states:StartSyncExecution'],
       resourceArns: [this.stateMachineArn],
     });
   }
@@ -256,10 +270,7 @@ abstract class StateMachineBase extends Resource implements IStateMachine {
    * @default - sum over 5 minutes
    */
   public metricFailed(props?: cloudwatch.MetricOptions): cloudwatch.Metric {
-    return this.cannedMetric(StatesMetrics.executionsFailedAverage, {
-      statistic: 'sum',
-      ...props,
-    });
+    return this.cannedMetric(StatesMetrics.executionsFailedSum, props);
   }
 
   /**
@@ -278,10 +289,7 @@ abstract class StateMachineBase extends Resource implements IStateMachine {
    * @default - sum over 5 minutes
    */
   public metricAborted(props?: cloudwatch.MetricOptions): cloudwatch.Metric {
-    return this.cannedMetric(StatesMetrics.executionsAbortedAverage, {
-      statistic: 'sum',
-      ...props,
-    });
+    return this.cannedMetric(StatesMetrics.executionsAbortedSum, props);
   }
 
   /**
@@ -290,10 +298,7 @@ abstract class StateMachineBase extends Resource implements IStateMachine {
    * @default - sum over 5 minutes
    */
   public metricSucceeded(props?: cloudwatch.MetricOptions): cloudwatch.Metric {
-    return this.cannedMetric(StatesMetrics.executionsSucceededAverage, {
-      statistic: 'sum',
-      ...props,
-    });
+    return this.cannedMetric(StatesMetrics.executionsSucceededSum, props);
   }
 
   /**
@@ -302,10 +307,7 @@ abstract class StateMachineBase extends Resource implements IStateMachine {
    * @default - sum over 5 minutes
    */
   public metricTimedOut(props?: cloudwatch.MetricOptions): cloudwatch.Metric {
-    return this.cannedMetric(StatesMetrics.executionsTimedOutAverage, {
-      statistic: 'sum',
-      ...props,
-    });
+    return this.cannedMetric(StatesMetrics.executionsTimedOutSum, props);
   }
 
   /**
@@ -504,6 +506,14 @@ export interface IStateMachine extends IResource, iam.IGrantable {
    * @param identity The principal
    */
   grantStartExecution(identity: iam.IGrantable): iam.Grant;
+
+  /**
+   * Grant the given identity permissions to start a synchronous execution of
+   * this state machine.
+   *
+   * @param identity The principal
+   */
+  grantStartSyncExecution(identity: iam.IGrantable): iam.Grant;
 
   /**
    * Grant the given identity read permissions for this state machine
